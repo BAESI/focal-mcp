@@ -77,3 +77,22 @@ agents.md
 ## Roadmap (Next)
 - Manage rules per project when working across multiple repos
 - UI/UX improvements for rule editing and visibility
+
+
+## Publish to PyPI (Option A)
+
+1. Create a PyPI token with scope for this project.
+2. Add the token to GitHub repository secrets as `PYPI_API_TOKEN`.
+3. Tag and push a release:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+GitHub Actions will build and publish automatically.
+
+Once published, users can run:
+```bash
+uvx --from focal-mcp-server focal-mcp-server
+```

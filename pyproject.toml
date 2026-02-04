@@ -15,6 +15,11 @@ dependencies = [
   "pydantic>=2.6",
 ]
 
+
+[project.urls]
+Homepage = "https://github.com/BAESI/focal-mcp"
+Issues = "https://github.com/BAESI/focal-mcp/issues"
+
 [project.scripts]
 focal-mcp-server = "focal_mcp_server.app:run"
 
