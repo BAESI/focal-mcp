@@ -96,3 +96,14 @@ Once published, users can run:
 ```bash
 uvx --from focal-mcp-server focal-mcp-server
 ```
+
+
+## Install & Run with uvx
+
+After the package is published to PyPI, anyone can run it without cloning the repo:
+
+```bash
+uvx --from focal-mcp-server focal-mcp-server
+```
+
+This will download the latest release and start the server.
