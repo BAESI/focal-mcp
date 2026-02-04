@@ -1,36 +1,18 @@
 # FOCAL MCP Server
 
-FOCAL MCP (Framework for Orchestrated Central AI ruLes) is a local MCP server that centralizes AI behavior rules and injects them across tools like Codex, Claude Code, and Cursor.
-
-## What This Server Does
-- Stores rules in a user home workspace: `~/.focal_mcp/workspace`
-- Serves a web UI to edit rules as files
-- Exposes MCP prompts/resources + list_changed notifications
-- Provides a `focal_rules` tool so agents can fetch the latest rules before every response
-
-## Project Layout (Refactored)
-```
-FOCAL-MCP/
-  README.md
-  SPEC.md
-  agents.md
-  pyproject.toml
-  src/
-    focal_mcp_server/
-      app.py
-      mcp.py
-      notifications.py
-      web.py
-      workspace.py
-      logging_utils.py
-```
+FOCAL MCP (Framework for Orchestrated Central AI ruLes) is a local MCP server that centralizes AI behavior rules and applies them across tools like Codex, Claude Code, and Cursor.
 
 ## Quick Start
+
+### Prerequisites
+- `uv` installed (required for `uvx`)
+
+### Run the server (recommended)
 ```bash
-uvx --from . focal-mcp-server
+uvx --from focal-mcp-server focal-mcp-server
 ```
 
-Web UI:
+Open the Web UI:
 ```
 http://127.0.0.1:8765
 ```
@@ -45,8 +27,22 @@ WebSocket notifications:
 ws://127.0.0.1:8765/mcp/ws
 ```
 
-## Workspace
-Rules are stored outside the repo:
+## Configure Your MCP Client
+
+FOCAL MCP uses **streamable HTTP**, so you start the server yourself and point clients to the URL above.
+
+### Codex (example)
+Add the following to `~/.codex/config.toml`:
+```toml
+[mcp_servers.focal]
+enabled = true
+url = "http://127.0.0.1:8765/mcp"
+```
+
+Restart Codex after saving.
+
+## Edit Rules (Live)
+Rules live outside the repo in:
 ```
 ~/.focal_mcp/workspace/
   core/
@@ -57,53 +53,22 @@ Rules are stored outside the repo:
   agents/
 ```
 
-## MCP Behavior
-- `initialize` returns instructions that include a runtime directive to call `focal_rules` before every response.
-- `tools/list` exposes `focal_rules` which returns the latest rules from disk.
-- Rule changes trigger:
-  - `notifications/prompts/list_changed`
-  - `notifications/resources/list_changed`
+Use the Web UI to edit files. Updates are applied immediately.
+
+## How Rules Are Applied
+FOCAL MCP exposes a tool named `focal_rules`. Agents should call it before every response to fetch the latest rules.
+
+If rules do not update immediately:
+1. Ensure the client is connected to the MCP server.
+2. Ensure the client calls `focal_rules` before responding.
+3. Reconnect the client if needed.
 
 ## Project Prompt (Codex)
-The repository-level prompt for Codex lives in:
+The repository-level prompt is stored in:
 ```
 agents.md
 ```
 
-## Development Notes
-- This project uses a `src/` layout for the Python package.
-- Use `SPEC.md` as the single source of truth for behavior, interfaces, and constraints.
-
-## Roadmap (Next)
-- Manage rules per project when working across multiple repos
+## Roadmap
+- Project-specific rule management for multi-repo workflows
 - UI/UX improvements for rule editing and visibility
-
-
-## Publish to PyPI (Option A)
-
-1. Create a PyPI token with scope for this project.
-2. Add the token to GitHub repository secrets as `PYPI_API_TOKEN`.
-3. Tag and push a release:
-
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-GitHub Actions will build and publish automatically.
-
-Once published, users can run:
-```bash
-uvx --from focal-mcp-server focal-mcp-server
-```
-
-
-## Install & Run with uvx
-
-After the package is published to PyPI, anyone can run it without cloning the repo:
-
-```bash
-uvx --from focal-mcp-server focal-mcp-server
-```
-
-This will download the latest release and start the server.
